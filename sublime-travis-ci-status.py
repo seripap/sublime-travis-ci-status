@@ -70,9 +70,12 @@ class Animation(object):
     self.view = view
     self.animation_loader = None
     self.interval_animation = None
+  def setView(self, view):
+    self.view = view
+  def getView(self):
+    return self.view
   def setLabel(self, label):
-    if self.animation_loader is None:
-      self.animation_loader = AnimationLoader(["[ • ]", "[ •• ]", "[ ••• ]", "[ •••• ]", "[ ••• ]", "[ •• ]", "[ • ]"], 0.5, label, " ", self.view)
+    self.animation_loader = AnimationLoader(["[ • ]", "[ •• ]", "[ ••• ]", "[ •••• ]", "[ ••• ]", "[ •• ]", "[ • ]"], 0.5, label, " ", self.view)
   def start(self):
     if self.animation_loader:
       if self.interval_animation is None:
@@ -93,7 +96,9 @@ class Animation(object):
 class TravisCIStatus(sublime_plugin.EventListener):
   def __init__(self):
     self.settings = sublime.load_settings('Preferences.sublime-settings')
-    self.build_started_animation = None
+    self.build_started_animations = []
+    self.currently_animated_build_view = None
+    self.last_status = None
 
   def get_setting(self, name, view, default = None):
     setting_value = view.settings().get(name, default)
@@ -103,8 +108,19 @@ class TravisCIStatus(sublime_plugin.EventListener):
 
     return setting_value
 
-  def on_load(self, view):
-    self.run(view)
+  def get_animated_view(self, view):
+    if len(self.build_started_animations) > 0:
+      for currentView in self.build_started_animations:
+        if currentView['id'] == view.id():
+          return currentView
+      return self.add_animation_to_view(view)
+    else:
+      return self.add_animation_to_view(view)
+
+  def add_animation_to_view(self, view):
+    viewObject = {'id': view.id(), 'animation': Animation(view)}
+    self.build_started_animations.append(viewObject)
+    return viewObject
 
   def on_new_async(self, view):
     self.run(view)
@@ -128,9 +144,6 @@ class TravisCIStatus(sublime_plugin.EventListener):
     if view.is_scratch() or view.settings().get('is_widget'):
       return
     
-    if self.build_started_animation is None:
-      self.build_started_animation = Animation(view)
-
     self.window = sublime.active_window()
 
     if self.get_setting('travis_private_projects', view):
@@ -143,6 +156,7 @@ class TravisCIStatus(sublime_plugin.EventListener):
     if self.TOKEN == None or self.TOKEN == '':
       status = 'Missing Travis CI API Token'
     else:
+      self.currently_animated_build_view = self.get_animated_view(view)
       status = self.get_status()
 
     # Update the status bar
@@ -157,14 +171,18 @@ class TravisCIStatus(sublime_plugin.EventListener):
       return repo_info['error']
 
     build_status = self.make_travis_request(repo_info)
-    
+
     if build_status['build_number'] is not None:
-      self.build_started_animation.setLabel( repo_info['branch'] + ' #' + build_status['build_number'] + ' building' )
+      self.currently_animated_build_view['animation'].setLabel( repo_info['branch'] + ' #' + build_status['build_number'] + ' building' )
 
     status = self.format_status_message(build_status, repo_info)
 
     if status is not None:
+      self.last_status = status
       return status
+
+    if self.last_status is not None and self.currently_animated_build_view['animation'].is_running == False:
+      return self.last_status
 
     return ''
 
@@ -173,11 +191,11 @@ class TravisCIStatus(sublime_plugin.EventListener):
 
     if build_status['status'] is not None and repo_info['branch'] is not None:
       if build_status['status'] == 'started':
-        if self.build_started_animation.is_running() == False:
-          return self.build_started_animation.start()
+        if self.currently_animated_build_view['animation'].is_running() == False:
+          return self.currently_animated_build_view['animation'].start()
       else:
-        if self.build_started_animation.is_running() == True:
-          self.build_started_animation.on_complete()
+        if self.currently_animated_build_view['animation'].is_running() == True:
+          self.currently_animated_build_view['animation'].on_complete()
         status = repo_info['branch'] + ' #' + build_status['build_number'] + ' ' + SYMBOLS[build_status['status']]
 
     return status
