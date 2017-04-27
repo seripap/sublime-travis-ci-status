@@ -80,6 +80,10 @@ class Animation(object):
     if self.animation_loader:
       if self.interval_animation is None:
         self.interval_animation = RepeatedTimer(self.animation_loader.sec, self.animation_loader.animate)
+      else:
+        self.interval_animation.stop()
+        self.interval_animation = None
+        self.start()
   def is_running(self):
     if self.interval_animation is not None:
       return True
@@ -175,7 +179,7 @@ class TravisCIStatus(sublime_plugin.EventListener):
       return repo_info['error']
 
     build_status = self.make_travis_request(repo_info)
-
+    print(repo_info['branch'])
     if build_status['build_number'] is not None:
       self.currently_animated_build_view['animation'].setLabel( repo_info['branch'] + ' #' + build_status['build_number'] + ' building' )
 
@@ -196,6 +200,9 @@ class TravisCIStatus(sublime_plugin.EventListener):
     if build_status['status'] is not None and repo_info['branch'] is not None:
       if build_status['status'] == 'started':
         if self.currently_animated_build_view['animation'].is_running() == False:
+          return self.currently_animated_build_view['animation'].start()
+        else:
+          self.currently_animated_build_view['animation'].on_complete()
           return self.currently_animated_build_view['animation'].start()
       else:
         if self.currently_animated_build_view['animation'].is_running() == True:
