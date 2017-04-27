@@ -128,11 +128,15 @@ class TravisCIStatus(sublime_plugin.EventListener):
   def on_clone_async(self, view):
     self.run(view)
 
-  def on_load_async(self, view):
-    self.run(view)
+  # Disabled to improve speed. Uf you want to see build
+  # status while cycling through files, uncomment the
+  # two hooks below
+  
+  # def on_load_async(self, view):
+  #   self.run(view)
 
-  def on_close(self, view):
-    self.run(view)
+  # def on_close(self, view):
+  #   self.run(view)
 
   def on_post_save_async(self, view):
     self.run(view)
@@ -143,7 +147,7 @@ class TravisCIStatus(sublime_plugin.EventListener):
   def run(self, view):
     if view.is_scratch() or view.settings().get('is_widget'):
       return
-    
+
     self.window = sublime.active_window()
 
     if self.get_setting('travis_private_projects', view):
