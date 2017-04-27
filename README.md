@@ -6,18 +6,32 @@
 
 ### Getting Started
 
-By default, this plugin reads from your git configuration for the current directory. You can  add the following to your local git config `/.git/config`:
+Set the following keys in your **User Preferences**.
+
+- `travis_api_token` is **required**. You can get this from [https://developer.travis-ci.com/authentication](https://developer.travis-ci.com/authentication)
+- `travis_private_projects` is optional. If set to true, the plugin will use https://api.travis-ci.com instead of https://api.travis-ci.org as its endpoint.
+
+```
+{
+  "travis_api_token": "",
+  "travis_private_projects": false,
+}
+```
+
+#### Setup
+
+By default, this plugin reads information from your git configuration for the current directory. You can  add the following to your local git config `/.git/config`:
 
 ```
 [travis]
     slug = <repo>/<repo-name>
 ```
 
-This slug must match the location of where it resides on travis-ci.com/org (**travis-ci.com/<repo>/<repo-name>**).
+This slug must match the location of where it resides on travis-ci.com/org (`travis-ci.org/<repo>/<repo-name>`).
 
-#### Project Setting
+#### Projects
 
-You can avoid having to set git configs by creating a project and setting the following key:
+You can avoid having to set git configs by creating a project and setting the following `settings key` inside of your project config:
 
 ```
 "settings": {
@@ -26,21 +40,6 @@ You can avoid having to set git configs by creating a project and setting the fo
 ```
 
 This will override any slug set by git config.
-
-### User Preferences
-
-You can configure your user preferences as such. 
-
-- `travis_api_token` is required. You can get this from [https://developer.travis-ci.com/authentication](https://developer.travis-ci.com/authentication)
-- `travis_private_projects` is optional. If set to true, the plugin will use https://api.travis-ci.com instead of https://api.travis-ci.org as its endpoint.
-
-```
-{
-  // defaults
-  "travis_api_token": "",
-  "travis_private_projects": false,
-}
-```
 
 ### Errors
 
