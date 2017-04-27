@@ -179,7 +179,6 @@ class TravisCIStatus(sublime_plugin.EventListener):
       return repo_info['error']
 
     build_status = self.make_travis_request(repo_info)
-    print(repo_info['branch'])
     if build_status['build_number'] is not None:
       self.currently_animated_build_view['animation'].setLabel( repo_info['branch'] + ' #' + build_status['build_number'] + ' building' )
 
