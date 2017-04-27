@@ -1,0 +1,5 @@
+{
+  // Add these to your Preferences file
+  "travis_api_token": "",
+  "travis_private_projects": true,
+}
