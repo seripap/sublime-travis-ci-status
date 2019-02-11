@@ -2,8 +2,6 @@
 
 > Shows current build status of active branch from Travis CI in the status bar for Sublime Text 3.
 
-![preview](./screenshot.gif)
-
 ### Getting Started
 
 Set the following keys in your **User Preferences**.
@@ -48,4 +46,3 @@ By default, if there is an error or a setting is configured incorrectly the stat
 ### Acknowledgements
 
 - [@Section214](https://github.com/Section214/ST3-Travis-CI) for original code.
-- [@pichillilorenzo](https://github.com/pichillilorenzo/JavaScript-Completions) for status bar animation
